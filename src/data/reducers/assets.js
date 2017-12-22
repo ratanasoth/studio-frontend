@@ -89,6 +89,16 @@ const sort = (state = sortInitial, action) => {
 
 const status = (state = {}, action) => {
   switch (action.type) {
+    case assetActions.REQUEST_ASSETS_SUCCESS:
+      return {
+        response: action.response,
+        type: action.type,
+      };
+    case assetActions.REQUEST_ASSETS_FAILURE:
+      return {
+        response: action.response,
+        type: action.type,
+      };
     case assetActions.CLEAR_ASSETS_STATUS:
       return {};
     case assetActions.DELETE_ASSET_SUCCESS:

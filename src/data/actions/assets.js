@@ -15,7 +15,12 @@ export const requestAssetsSuccess = response => ({
   data: response,
 });
 
-export const assetDeleteFailure = response => ({
+export const requestAssetsFailure = response => ({
+  type: assetActions.REQUEST_ASSETS_FAILURE,
+  data: response,
+});
+
+export const deleteAssetFailure = response => ({
   type: assetActions.DELETE_ASSET_FAILURE,
   response,
 });
@@ -41,7 +46,7 @@ export const getAssets = (request, courseDetails) =>
         }
       })
       .catch((error) => {
-        dispatch(assetDeleteFailure(error));
+        dispatch(requestAssetsFailure(error));
       });
 
 export const filterUpdate = (filterKey, filterValue) => ({
@@ -70,10 +75,15 @@ export const deleteAsset = (assetId, courseDetails) =>
     clientApi.requestDeleteAsset(courseDetails.id, assetId)
       .then((response) => {
         if (response.ok) {
-          dispatch(deleteAssetSuccess(assetId, response));
-        } else {
-          dispatch(assetDeleteFailure(response));
+          return response.json();
         }
+        throw new Error(response);
+      })
+      .then((json) => {
+        dispatch(deleteAssetSuccess(assetId, json));
+      })
+      .catch((error) => {
+        dispatch(deleteAssetFailure(error));
       });
 
 export const togglingLockAsset = asset => ({
@@ -95,16 +105,20 @@ export const toggleLockAssetFailure = (asset, response) => ({
 export const toggleLockAsset = (asset, courseDetails) =>
   (dispatch) => {
     dispatch(togglingLockAsset(asset));
-    clientApi.requestToggleLockAsset(courseDetails.id, asset)
+    return clientApi.requestToggleLockAsset(courseDetails.id, asset)
       .then((response) => {
-        if (response.ok) {
-          dispatch(toggleLockAssetSuccess(asset));
-        } else {
-          dispatch(toggleLockAssetFailure(asset, response));
+        if (!response.ok) {
+          throw new Error(response);
         }
+      })
+      .then(() => {
+        dispatch(toggleLockAssetSuccess(asset));
+      })
+      .catch((error) => {
+        dispatch(toggleLockAssetFailure(asset, error));
       });
   };
 
-export const clearAssetsStatus = () =>
-  dispatch =>
-    dispatch({ type: assetActions.CLEAR_ASSETS_STATUS });
+export const clearAssetsStatus = () => ({
+  type: assetActions.CLEAR_ASSETS_STATUS,
+});
