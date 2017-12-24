@@ -5,10 +5,10 @@ const compare = (attributes, obj1, obj2) => (
   attributes.every(attribute => (obj1[attribute] === obj2[attribute]))
 );
 
-const isSameResponse = (request, lastRequest) => (
-  compare(['page', 'sort', 'direction'], request, lastRequest) &&
-  compare(['Audio', 'Code', 'Documents', 'Images', 'OTHER'], request.assetTypes, lastRequest.assetTypes)
-);
+const isSameResponse = (request, lastRequest) => {
+  return compare(['page', 'sort', 'direction'], request, lastRequest) &&
+  compare(['Audio', 'Code', 'Documents', 'Images', 'OTHER'], request.assetTypes, lastRequest.assetTypes);
+};
 
 export const requestAssetsSuccess = response => ({
   type: assetActions.REQUEST_ASSETS_SUCCESS,
@@ -18,11 +18,6 @@ export const requestAssetsSuccess = response => ({
 export const requestAssetsFailure = response => ({
   type: assetActions.REQUEST_ASSETS_FAILURE,
   data: response,
-});
-
-export const deleteAssetFailure = response => ({
-  type: assetActions.DELETE_ASSET_FAILURE,
-  response,
 });
 
 export const getAssets = (request, courseDetails) =>
@@ -67,6 +62,11 @@ export const pageUpdate = page => ({
 export const deleteAssetSuccess = (assetId, response) => ({
   type: assetActions.DELETE_ASSET_SUCCESS,
   assetId,
+  response,
+});
+
+export const deleteAssetFailure = response => ({
+  type: assetActions.DELETE_ASSET_FAILURE,
   response,
 });
 

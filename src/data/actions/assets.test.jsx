@@ -4,20 +4,18 @@ import thunk from 'redux-thunk';
 
 import endpoints from '../api/endpoints';
 import * as actionCreators from './assets';
+import { requestInitial } from '../reducers/assets';
 import { assetActions } from '../../data/constants/actionTypes';
 
 const initialState = {
-  request: {
-    assetTypes: {},
-    start: 0,
-    end: 0,
-    page: 0,
-    pageSize: 50,
-    totalCount: 0,
-    sort: 'date_added',
-    direction: 'desc',
-  },
+  request: { ...requestInitial },
 };
+
+const courseDetails = {
+  id: 'edX',
+};
+
+const assetId = 'asset';
 
 const assetsEndpoint = endpoints.assets;
 const middlewares = [thunk];
@@ -43,18 +41,8 @@ describe('Assets Action Creators', () => {
     expect(store.dispatch(actionCreators.deleteAssetFailure('response'))).toEqual(expectedAction);
   });
   it('returns expected state from getAssets success', () => {
-    const request = {
-      page: 0,
-      assetTypes: {},
-      sort: 'date_added',
-      direction: 'desc',
-    };
-
+    const request = requestInitial;
     const response = request;
-
-    const courseDetails = {
-      id: 'edX',
-    };
 
     fetchMock.once(`begin:${assetsEndpoint}`, response);
     const expectedActions = [
@@ -67,12 +55,7 @@ describe('Assets Action Creators', () => {
     });
   });
   it('returns expected state from getAssets failure', () => {
-    const request = {
-      page: 0,
-      assetTypes: {},
-      sort: 'date_added',
-      direction: 'desc',
-    };
+    const request = requestInitial;
 
     const response = {
       status: 400,
@@ -80,10 +63,6 @@ describe('Assets Action Creators', () => {
     };
 
     const errorResponse = new Error(response);
-
-    const courseDetails = {
-      id: 'edX',
-    };
 
     fetchMock.once(`begin:${assetsEndpoint}`, response);
     const expectedActions = [
@@ -96,19 +75,13 @@ describe('Assets Action Creators', () => {
       expect(store.getActions()).toEqual(expectedActions);
     });
   });
-  it('returns expected state from getAssets success', () => {
+  it('returns expected state from getAssets if response metadata does not match request', () => {
     const request = {
-      page: 0,
-      assetTypes: {},
-      sort: 'date_added',
+      ...requestInitial,
       direction: 'asc',
     };
 
     const response = request;
-
-    const courseDetails = {
-      id: 'edX',
-    };
 
     fetchMock.once(`begin:${assetsEndpoint}`, response);
 
@@ -133,20 +106,17 @@ describe('Assets Action Creators', () => {
     expect(store.dispatch(actionCreators.pageUpdate(0))).toEqual(expectedAction);
   });
   it('returns expected state from deleteAsset success', () => {
-    const assetId = 'asset';
-
-    const courseDetails = {
-      id: 'edX',
+    const response = {
+      status: 202,
+      body: {
+        response: 'Asset deleted!',
+      },
     };
-
-    const responseBody = { response: 'Asset deleted!' };
-    const responseStatus = 202;
-    const response = { status: responseStatus, body: responseBody };
 
     fetchMock.once(`begin:${assetsEndpoint}`, response);
 
     const expectedActions = [
-      { type: assetActions.DELETE_ASSET_SUCCESS, assetId, response: responseBody },
+      { type: assetActions.DELETE_ASSET_SUCCESS, assetId, response: response.body },
     ];
 
     return store.dispatch(actionCreators.deleteAsset(assetId, courseDetails)).then(() => {
@@ -155,16 +125,12 @@ describe('Assets Action Creators', () => {
     });
   });
   it('returns expected state from deleteAsset failure', () => {
-    const assetId = 'asset';
-
-    const courseDetails = {
-      id: 'edX',
+    const response = {
+      status: 400,
+      body: {
+        response: 'Asset could not be deleted!',
+      },
     };
-
-    const responseBody = { response: 'Asset could not be deleted!' };
-    const responseStatus = 400;
-    const response = { status: responseStatus, body: responseBody };
-
     const errorResponse = new Error(response);
 
     fetchMock.once(`begin:${assetsEndpoint}`, response);
@@ -191,45 +157,35 @@ describe('Assets Action Creators', () => {
     expect(store.dispatch(actionCreators.toggleLockAssetFailure('asset', 'response'))).toEqual(expectedAction);
   });
   it('returns expected state from toggleLockAsset success', () => {
-    const asset = 'asset';
-
-    const courseDetails = {
-      id: 'edX',
-    };
-
     fetchMock.once(`begin:${assetsEndpoint}`, 200);
 
     const expectedActions = [
-      { type: assetActions.TOGGLING_LOCK_ASSET_SUCCESS, asset },
-      { type: assetActions.TOGGLE_LOCK_ASSET_SUCCESS, asset },
+      { type: assetActions.TOGGLING_LOCK_ASSET_SUCCESS, asset: assetId },
+      { type: assetActions.TOGGLE_LOCK_ASSET_SUCCESS, asset: assetId },
     ];
 
-    return store.dispatch(actionCreators.toggleLockAsset(asset, courseDetails)).then(() => {
+    return store.dispatch(actionCreators.toggleLockAsset(assetId, courseDetails)).then(() => {
       // return of async actions
       expect(store.getActions()).toEqual(expectedActions);
     });
   });
   it('returns expected state from toggleLockAsset failure', () => {
-    const asset = 'asset';
-
-    const courseDetails = {
-      id: 'edX',
+    const response = {
+      status: 500,
+      body: {
+        response: 'Asset could not be toggled!',
+      },
     };
-
-    const responseBody = { response: 'Asset could not be toggled!' };
-    const responseStatus = 500;
-    const response = { status: responseStatus, body: responseBody };
-
     const errorResponse = new Error(response);
 
     fetchMock.once(`begin:${assetsEndpoint}`, response);
 
     const expectedActions = [
-      { type: assetActions.TOGGLING_LOCK_ASSET_SUCCESS, asset },
-      { type: assetActions.TOGGLING_LOCK_ASSET_FAILURE, asset, response: errorResponse },
+      { type: assetActions.TOGGLING_LOCK_ASSET_SUCCESS, asset: assetId },
+      { type: assetActions.TOGGLING_LOCK_ASSET_FAILURE, asset: assetId, response: errorResponse },
     ];
 
-    return store.dispatch(actionCreators.toggleLockAsset(asset, courseDetails)).then(() => {
+    return store.dispatch(actionCreators.toggleLockAsset(assetId, courseDetails)).then(() => {
       // return of async actions
       expect(store.getActions()).toEqual(expectedActions);
     });

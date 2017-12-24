@@ -3,27 +3,29 @@ import { assetActions } from '../../data/constants/actionTypes';
 import { assetLoading } from '../../data/constants/loadingTypes';
 import { getAssetAPIAttributeFromDatabaseAttribute } from '../../utils/getAssetsAttributes';
 
+let action;
 let defaultState;
+let state;
 
-describe('Assets', () => {
+describe('Assets Reducers', () => {
   describe('assets reducer', () => {
     it('returns correct assets state for REQUEST_ASSETS_SUCCESS action', () => {
       defaultState = [];
 
-      const newActionData = {
-        assets: [
-          { id: 'asset1' },
-          { id: 'asset2' },
-          { id: 'asset3' },
-        ],
+      action = {
+        type: assetActions.REQUEST_ASSETS_SUCCESS,
+        data: {
+          assets: [
+            { id: 'asset1' },
+            { id: 'asset2' },
+            { id: 'asset3' },
+          ],
+        },
       };
 
-      const state = reducers.assets(defaultState, {
-        type: assetActions.REQUEST_ASSETS_SUCCESS,
-        data: newActionData,
-      });
+      state = reducers.assets(defaultState, action);
 
-      expect(state).toEqual(newActionData.assets);
+      expect(state).toEqual(action.data.assets);
     });
     it('returns correct assets state for DELETE_ASSET_SUCCESS action', () => {
       defaultState = {
@@ -34,17 +36,16 @@ describe('Assets', () => {
         ],
       };
 
-      const newActionData = {
+      action = {
+        type: assetActions.DELETE_ASSET_SUCCESS,
         assetId: 'asset2',
       };
 
-      const state = reducers.assets(defaultState.assets, {
-        type: assetActions.DELETE_ASSET_SUCCESS,
-        ...newActionData,
-      });
+      state = reducers.assets(defaultState.assets, action);
 
+      // filter out the deleted asset
       expect(state).toEqual(defaultState.assets.filter(
-        asset => asset.id !== newActionData.assetId));
+        asset => asset.id !== action.assetId));
     });
     it('returns correct assets state for TOGGLE_LOCK_ASSET_SUCCESS action', () => {
       defaultState = {
@@ -55,18 +56,17 @@ describe('Assets', () => {
         ],
       };
 
+      // deep copy over the old state and change data appropriately to reflect new state
       const newState = defaultState.assets.map(asset => ({ ...asset }));
       newState[1].loadingFields = [];
       newState[1].locked = true;
 
-      const newActionData = {
+      action = {
         asset: { id: 'asset2' },
+        type: assetActions.TOGGLE_LOCK_ASSET_SUCCESS,
       };
 
-      const state = reducers.assets(defaultState.assets, {
-        type: assetActions.TOGGLE_LOCK_ASSET_SUCCESS,
-        ...newActionData,
-      });
+      state = reducers.assets(defaultState.assets, action);
 
       expect(state).toEqual(newState);
     });
@@ -79,17 +79,16 @@ describe('Assets', () => {
         ],
       };
 
-      const newActionData = {
+      action = {
         assetId: 'asset2',
+        type: assetActions.TOGGLING_LOCK_ASSET_FAILURE,
       };
 
+      // deep copy over the old state and change data appropriately to reflect new state
       const newState = defaultState.assets.map(asset => ({ ...asset }));
       newState[1].loadingFields = [];
 
-      const state = reducers.assets(defaultState.assets, {
-        type: assetActions.TOGGLING_LOCK_ASSET_FAILURE,
-        ...newActionData,
-      });
+      state = reducers.assets(defaultState.assets, action);
 
       expect(state).toEqual(newState);
     });
@@ -102,51 +101,51 @@ describe('Assets', () => {
         ],
       };
 
-      const newActionData = {
+      action = {
         asset: {
           id: 'asset2',
         },
+        type: assetActions.TOGGLING_LOCK_ASSET_SUCCESS,
       };
 
       const newState = defaultState.assets.map(asset => ({ ...asset }));
       newState[1].loadingFields = [assetLoading.LOCK];
 
-      const state = reducers.assets(defaultState.assets, {
-        type: assetActions.TOGGLING_LOCK_ASSET_SUCCESS,
-        ...newActionData,
-      });
+      state = reducers.assets(defaultState.assets, action);
 
       expect(state).toEqual(newState);
     });
     it('returns correct assets state for DELETE_ASSET_FAILURE action', () => {
       defaultState = [];
 
-      const state = reducers.assets(defaultState, {
+      action = {
         type: assetActions.DELETE_ASSET_FAILURE,
-      });
+      };
+
+      state = reducers.assets(defaultState, action);
 
       expect(state).toEqual([]);
     });
   });
-  describe('metadata', () => {
+  describe('metadata reducer', () => {
     describe('filter reducer', () => {
       defaultState = reducers.filtersInitial;
 
       it('returns correct assetTypes state on REQUEST_ASSETS_SUCCESS action', () => {
-        const newActionData = {
-          assetTypes: {
-            edX: true,
+        action = {
+          data: {
+            assetTypes: {
+              edX: true,
+            },
           },
+          type: assetActions.REQUEST_ASSETS_SUCCESS,
         };
 
-        const state = reducers.filters(defaultState, {
-          type: assetActions.REQUEST_ASSETS_SUCCESS,
-          data: newActionData,
-        });
+        state = reducers.filters(defaultState, action);
 
         expect(state).toEqual({
           ...defaultState,
-          assetTypes: { ...defaultState.assetTypes, ...newActionData },
+          assetTypes: { ...defaultState.assetTypes, ...action.data },
         });
       });
     });
@@ -154,45 +153,46 @@ describe('Assets', () => {
       defaultState = reducers.paginationInitial;
 
       it('returns correct pagination state on REQUEST_ASSETS_SUCCESS action', () => {
-        const newActionData = {
-          start: 99,
-          end: 101,
-          page: 100,
-          pageSize: 1,
-          totalCount: 100,
+        action = {
+          data: {
+            start: 99,
+            end: 101,
+            page: 100,
+            pageSize: 1,
+            totalCount: 100,
+          },
+          type: assetActions.REQUEST_ASSETS_SUCCESS,
         };
 
-        const state = reducers.pagination(defaultState, {
-          type: assetActions.REQUEST_ASSETS_SUCCESS,
-          data: newActionData,
-        });
+        state = reducers.pagination(defaultState, action);
 
         expect(state).toEqual({
-          ...newActionData,
+          ...action.data,
         });
       });
     });
     describe('sort reducer', () => {
       it('returns correct sort and direction state on REQUEST_ASSETS_SUCCESS action', () => {
-        const newActionData = {
-          sort: 'content_type',
-          direction: 'asc',
+        action = {
+          data: {
+            sort: 'content_type',
+            direction: 'asc',
+          },
+          type: assetActions.REQUEST_ASSETS_SUCCESS,
         };
 
-        const state = reducers.sort(defaultState, {
-          type: assetActions.REQUEST_ASSETS_SUCCESS,
-          data: newActionData,
-        });
+        state = reducers.sort(defaultState, action);
 
         expect(state).toEqual({
-          ...newActionData,
-          sort: getAssetAPIAttributeFromDatabaseAttribute(newActionData.sort),
+          ...action.data,
+          sort: getAssetAPIAttributeFromDatabaseAttribute(action.data.sort),
         });
       });
     });
     describe('status reducer', () => {
       defaultState = {};
 
+      // the status reducer treats all the following actions identically, so loop over them
       const sameBehaviorReducers = [
         assetActions.REQUEST_ASSETS_SUCCESS,
         assetActions.REQUEST_ASSETS_FAILURE,
@@ -201,37 +201,35 @@ describe('Assets', () => {
       ];
 
       sameBehaviorReducers.forEach((reducer) => {
-        it(`returns correct status state on ${reducer} action`, () => {
-          const newActionData = {
+        it(`returns correct status state on ${reducer.split('.')[1]} action`, () => {
+          action = {
             type: reducer,
             response: 'Status!',
           };
 
-          const state = reducers.status(defaultState, newActionData);
+          state = reducers.status(defaultState, action);
 
-          expect(state).toEqual(newActionData);
+          expect(state).toEqual(action);
         });
       });
 
       it('returns correct status state on CLEAR_ASSETS_STATUS action', () => {
-        const state = reducers.status(defaultState, {
+        state = reducers.status(defaultState, {
           type: assetActions.CLEAR_ASSETS_STATUS,
         });
 
         expect(state).toEqual({});
       });
       it('returns correct status state on TOGGLING_LOCK_ASSET_FALURE action', () => {
-        const newActionData = {
+        action = {
           asset: 'asset',
           response: 'Failure!',
           type: assetActions.TOGGLING_LOCK_ASSET_FAILURE,
         };
 
-        const state = reducers.status(defaultState, {
-          ...newActionData,
-        });
+        state = reducers.status(defaultState, action);
 
-        expect(state).toEqual(newActionData);
+        expect(state).toEqual(action);
       });
     });
   });
@@ -239,51 +237,51 @@ describe('Assets', () => {
     defaultState = reducers.requestInitial;
 
     it('returns correct sort and direction state on SORT_UPDATE action', () => {
-      const newActionData = {
-        sort: 'edX',
-        direction: 'desc',
-      };
-
-      const state = reducers.request(defaultState, {
-        type: assetActions.SORT_UPDATE,
-        data: newActionData,
-      });
-
-      expect(state).toEqual({
-        ...defaultState,
-        ...newActionData,
-      });
-    });
-    it('returns correct sort and direction state on SORT_UPDATE action', () => {
-      const newActionData = {
-        page: 100,
-      };
-
-      const state = reducers.request(defaultState, {
-        type: assetActions.PAGE_UPDATE,
-        data: newActionData,
-      });
-
-      expect(state).toEqual({
-        ...defaultState,
-        ...newActionData,
-      });
-    });
-    it('returns correct sort and direction state on SORT_UPDATE action', () => {
-      const newActionData = {
-        assetTypes: {
-          edX: true,
+      action = {
+        data: {
+          sort: 'edX',
+          direction: 'desc',
         },
+        type: assetActions.SORT_UPDATE,
       };
 
-      const state = reducers.request(defaultState, {
-        type: assetActions.FILTER_UPDATED,
-        data: newActionData,
-      });
+      state = reducers.request(defaultState, action);
 
       expect(state).toEqual({
         ...defaultState,
-        assetTypes: { ...defaultState.assetTypes, ...newActionData },
+        ...action.data,
+      });
+    });
+    it('returns correct sort and direction state on PAGE_UPDATE action', () => {
+      action = {
+        data: {
+          page: 100,
+        },
+        type: assetActions.PAGE_UPDATE,
+      };
+
+      state = reducers.request(defaultState, action);
+
+      expect(state).toEqual({
+        ...defaultState,
+        ...action.data,
+      });
+    });
+    it('returns correct sort and direction state on FILTER_UPDATE action', () => {
+      action = {
+        data: {
+          assetTypes: {
+            edX: true,
+          },
+        },
+        type: assetActions.FILTER_UPDATED,
+      };
+
+      state = reducers.request(defaultState, action);
+
+      expect(state).toEqual({
+        ...defaultState,
+        assetTypes: { ...defaultState.assetTypes, ...action.data },
       });
     });
   });
