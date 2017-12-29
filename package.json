@@ -13,7 +13,7 @@
   },
   "license": "AGPL-3.0",
   "dependencies": {
-    "@edx/edx-bootstrap": "edx/edx-bootstrap#d552c6e088148d32b29c5a7c0da2f41c55418e1a",
+    "@edx/edx-bootstrap": "^0.4.3",
     "@edx/paragon": "^1.4.11",
     "babel-polyfill": "^6.26.0",
     "classnames": "^2.2.5",
