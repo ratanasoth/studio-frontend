@@ -34,7 +34,7 @@ export const AssetsFilters = ({ assetsFilters, updateFilter }) => (
     {ASSET_TYPES.map(type => (
       <li key={type.key}>
         <CheckBox
-          name={type.key}
+          id={type.key}
           label={type.displayName}
           checked={assetsFilters[type.key]}
           onChange={checked => updateFilter(type.key, checked)}
