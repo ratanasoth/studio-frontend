@@ -126,7 +126,6 @@ describe('Assets Action Creators', () => {
     const response = {
       status: 400,
     };
-    // const errorResponse = new Error(response);
 
     fetchMock.once(`begin:${assetsEndpoint}`, response);
 
