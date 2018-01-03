@@ -37,8 +37,8 @@ describe('Assets Action Creators', () => {
     expect(store.dispatch(actionCreators.requestAssetsSuccess('response'))).toEqual(expectedAction);
   });
   it('returns expected state from assetDeleteFailure', () => {
-    const expectedAction = { response: 'response', type: assetActions.DELETE_ASSET_FAILURE };
-    expect(store.dispatch(actionCreators.deleteAssetFailure('response'))).toEqual(expectedAction);
+    const expectedAction = { assetId, type: assetActions.DELETE_ASSET_FAILURE };
+    expect(store.dispatch(actionCreators.deleteAssetFailure(assetId))).toEqual(expectedAction);
   });
   it('returns expected state from getAssets success', () => {
     const request = requestInitial;
@@ -107,16 +107,14 @@ describe('Assets Action Creators', () => {
   });
   it('returns expected state from deleteAsset success', () => {
     const response = {
-      status: 202,
-      body: {
-        response: 'Asset deleted!',
-      },
+      status: 204,
+      body: {},
     };
 
     fetchMock.once(`begin:${assetsEndpoint}`, response);
 
     const expectedActions = [
-      { type: assetActions.DELETE_ASSET_SUCCESS, assetId, response: response.body },
+      { type: assetActions.DELETE_ASSET_SUCCESS, assetId },
     ];
 
     return store.dispatch(actionCreators.deleteAsset(assetId, courseDetails)).then(() => {
@@ -127,16 +125,13 @@ describe('Assets Action Creators', () => {
   it('returns expected state from deleteAsset failure', () => {
     const response = {
       status: 400,
-      body: {
-        response: 'Asset could not be deleted!',
-      },
     };
-    const errorResponse = new Error(response);
+    // const errorResponse = new Error(response);
 
     fetchMock.once(`begin:${assetsEndpoint}`, response);
 
     const expectedActions = [
-      { type: assetActions.DELETE_ASSET_FAILURE, response: errorResponse },
+      { type: assetActions.DELETE_ASSET_FAILURE, assetId },
     ];
 
     return store.dispatch(actionCreators.deleteAsset(assetId, courseDetails)).then(() => {

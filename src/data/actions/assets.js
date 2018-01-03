@@ -59,31 +59,28 @@ export const pageUpdate = page => ({
   data: { page },
 });
 
-export const deleteAssetSuccess = (assetId, response) => ({
+export const deleteAssetSuccess = assetId => ({
   type: assetActions.DELETE_ASSET_SUCCESS,
   assetId,
-  response,
 });
 
-export const deleteAssetFailure = response => ({
+export const deleteAssetFailure = assetId => ({
   type: assetActions.DELETE_ASSET_FAILURE,
-  response,
+  assetId,
 });
+
 
 export const deleteAsset = (assetId, courseDetails) =>
   dispatch =>
     clientApi.requestDeleteAsset(courseDetails.id, assetId)
+    // since the API returns 204 on success and 404 on failure, neither of which have
+    // content, we don't json-ify the response
       .then((response) => {
         if (response.ok) {
-          return response.json();
+          dispatch(deleteAssetSuccess(assetId));
+        } else {
+          dispatch(deleteAssetFailure(assetId));
         }
-        throw new Error(response);
-      })
-      .then((json) => {
-        dispatch(deleteAssetSuccess(assetId, json));
-      })
-      .catch((error) => {
-        dispatch(deleteAssetFailure(error));
       });
 
 export const togglingLockAsset = asset => ({
